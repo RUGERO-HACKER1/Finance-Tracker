@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💰 Personal Finance Tracker Pro</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/date-fns@2.29.3/index.min.js"></script>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="loading-screen" style="display: none;">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <h2>💰 Finance Tracker Pro</h2>
+            <p>Loading your financial dashboard...</p>
+        </div>
+    </div>
+
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-chart-line"></i>
+                    <span>FinanceTracker</span>
+                </div>
+                <button class="sidebar-toggle" id="sidebarToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+
+            <div class="nav-menu">
+                <a href="#dashboard" class="nav-item active" data-section="dashboard">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#transactions" class="nav-item" data-section="transactions">
+                    <i class="fas fa-exchange-alt"></i>
+                    <span>Transactions</span>
+                </a>
+                <a href="#analytics" class="nav-item" data-section="analytics">
+                    <i class="fas fa-chart-pie"></i>
+                    <span>Analytics</span>
+                </a>
+                <a href="#budgets" class="nav-item" data-section="budgets">
+                    <i class="fas fa-bullseye"></i>
+                    <span>Budgets</span>
+                </a>
+                <a href="#goals" class="nav-item" data-section="goals">
+                    <i class="fas fa-trophy"></i>
+                    <span>Goals</span>
+                </a>
+                <a href="#settings" class="nav-item" data-section="settings">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </a>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Header -->
+            <header class="top-header">
+                <div class="header-left">
+                    <button class="mobile-menu-btn" id="mobileMenuBtn">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1 class="page-title">Dashboard</h1>
+                </div>
+                <div class="header-right">
+                    <div class="header-stats">
+                        <div class="quick-stat">
+                            <span class="stat-label">This Month</span>
+                            <span class="stat-value" id="monthlyBalance">+0 RWF</span>
+                        </div>
+                    </div>
+                    <button id="darkModeToggle" class="theme-toggle">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <div class="user-menu">
+                        <button class="user-avatar">
+                            <i class="fas fa-user-circle"></i>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dashboard Section -->
+            <section id="dashboard" class="content-section active">
+                <!-- Financial Overview Cards -->
+                <div class="overview-cards">
+                    <div class="overview-card balance-card">
+                        <div class="card-header">
+                            <div class="card-icon balance-icon">
+                                <i class="fas fa-wallet"></i>
+                            </div>
+                            <div class="card-info">
+                                <h3>Current Balance</h3>
+                                <div class="balance-amount" id="totalBalance">0 RWF</div>
+                                <div class="balance-change" id="balanceChange">
+                                    <i class="fas fa-arrow-up"></i>
+                                    <span>+0% from last month</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="overview-card income-card">
+                        <div class="card-header">
+                            <div class="card-icon income-icon">
+                                <i class="fas fa-arrow-trend-up"></i>
+                            </div>
+                            <div class="card-info">
+                                <h3>Total Income</h3>
+                                <div class="amount-value" id="totalIncome">0 RWF</div>
+                                <div class="amount-period">This month</div>
+                            </div>
+                        </div>
+                        <div class="card-chart">
+                            <canvas id="incomeSparkline" width="100" height="40"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="overview-card expense-card">
+                        <div class="card-header">
+                            <div class="card-icon expense-icon">
+                                <i class="fas fa-arrow-trend-down"></i>
+                            </div>
+                            <div class="card-info">
+                                <h3>Total Expenses</h3>
+                                <div class="amount-value" id="totalExpenses">0 RWF</div>
+                                <div class="amount-period">This month</div>
+                            </div>
+                        </div>
+                        <div class="card-chart">
+                            <canvas id="expenseSparkline" width="100" height="40"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="overview-card savings-card">
+                        <div class="card-header">
+                            <div class="card-icon savings-icon">
+                                <i class="fas fa-piggy-bank"></i>
+                            </div>
+                            <div class="card-info">
+                                <h3>Savings Rate</h3>
+                                <div class="amount-value" id="savingsRate">0%</div>
+                                <div class="amount-period">Of total income</div>
+                            </div>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="savingsProgress"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="quick-actions">
+                    <h2>Quick Actions</h2>
+                    <div class="action-buttons">
+                        <button class="action-btn primary" id="quickAddIncome">
+                            <i class="fas fa-plus"></i>
+                            <span>Add Income</span>
+                        </button>
+                        <button class="action-btn secondary" id="quickAddExpense">
+                            <i class="fas fa-minus"></i>
+                            <span>Add Expense</span>
+                        </button>
+                        <button class="action-btn tertiary" id="viewReports">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>View Reports</span>
+                        </button>
+                        <button class="action-btn quaternary" id="setBudget">
+                            <i class="fas fa-bullseye"></i>
+                            <span>Set Budget</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Recent Transactions Preview -->
+                <div class="recent-transactions">
+                    <div class="section-header">
+                        <h2>Recent Transactions</h2>
+                        <button class="view-all-btn" onclick="showSection('transactions')">
+                            View All <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                    <div class="transactions-preview" id="recentTransactionsList">
+                        <div class="no-transactions">
+                            <i class="fas fa-receipt"></i>
+                            <p>No recent transactions</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Transactions Section -->
+            <section id="transactions" class="content-section">
+                <div class="section-header">
+                    <h2>Transactions</h2>
+                    <button class="btn-primary" id="addTransactionBtn">
+                        <i class="fas fa-plus"></i> Add Transaction
+                    </button>
+                </div>
+
+                <!-- Transaction Filters -->
+                <div class="transaction-filters">
+                    <div class="filter-group">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="searchInput" placeholder="Search transactions...">
+                        </div>
+                        <select id="filterType" class="filter-select">
+                            <option value="all">All Types</option>
+                            <option value="income">Income</option>
+                            <option value="expense">Expense</option>
+                        </select>
+                        <select id="filterCategory" class="filter-select">
+                            <option value="all">All Categories</option>
+                        </select>
+                        <select id="filterPeriod" class="filter-select">
+                            <option value="all">All Time</option>
+                            <option value="today">Today</option>
+                            <option value="week">This Week</option>
+                            <option value="month">This Month</option>
+                            <option value="year">This Year</option>
+                        </select>
+                    </div>
+                    <div class="filter-actions">
+                        <button class="btn-secondary" id="addSampleBtn">
+                            <i class="fas fa-magic"></i> Add Sample Data
+                        </button>
+                        <button class="btn-secondary" id="exportCsvBtn">
+                            <i class="fas fa-download"></i> Export CSV
+                        </button>
+                        <button class="btn-danger" id="clearAllBtn">
+                            <i class="fas fa-trash"></i> Clear All
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Transaction Stats -->
+                <div class="transaction-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">Total Transactions</span>
+                        <span class="stat-value" id="totalTransactions">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">This Month</span>
+                        <span class="stat-value" id="monthlyTransactions">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Average/Day</span>
+                        <span class="stat-value" id="avgDaily">0</span>
+                    </div>
+                </div>
+
+                <!-- Transaction List -->
+                <div class="transaction-list-container">
+                    <div class="list-header">
+                        <div class="bulk-actions">
+                            <input type="checkbox" id="selectAll" class="bulk-checkbox">
+                            <label for="selectAll">Select All</label>
+                            <button class="btn-danger bulk-delete" id="bulkDelete" style="display: none;">
+                                <i class="fas fa-trash"></i> Delete Selected
+                            </button>
+                        </div>
+                        <div class="sort-options">
+                            <select id="sortBy" class="sort-select">
+                                <option value="date-desc">Newest First</option>
+                                <option value="date-asc">Oldest First</option>
+                                <option value="amount-desc">Highest Amount</option>
+                                <option value="amount-asc">Lowest Amount</option>
+                                <option value="category">Category</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="transactionsList" class="transactions-list">
+                        <div class="no-transactions">
+                            <i class="fas fa-receipt"></i>
+                            <p>No transactions found</p>
+                            <button class="btn-primary" onclick="showAddTransactionModal()">
+                                Add Your First Transaction
+                            </button>
+                        </div>
+                    </div>
+                    <div class="pagination" id="pagination" style="display: none;">
+                        <button class="page-btn" id="prevPage">Previous</button>
+                        <span class="page-info" id="pageInfo">Page 1 of 1</span>
+                        <button class="page-btn" id="nextPage">Next</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Analytics Section -->
+            <section id="analytics" class="content-section">
+                <div class="section-header">
+                    <h2>Analytics & Reports</h2>
+                    <div class="period-selector">
+                        <button class="period-btn active" data-period="month">This Month</button>
+                        <button class="period-btn" data-period="quarter">Quarter</button>
+                        <button class="period-btn" data-period="year">Year</button>
+                        <button class="period-btn" data-period="all">All Time</button>
+                    </div>
+                </div>
+
+                <!-- Analytics Cards -->
+                <div class="analytics-grid">
+                    <div class="analytics-card">
+                        <h3>Spending by Category</h3>
+                        <div class="chart-container">
+                            <canvas id="categoryChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="analytics-card">
+                        <h3>Income vs Expenses</h3>
+                        <div class="chart-container">
+                            <canvas id="incomeExpenseChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="analytics-card">
+                        <h3>Monthly Trends</h3>
+                        <div class="chart-container">
+                            <canvas id="trendsChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="analytics-card">
+                        <h3>Top Spending Categories</h3>
+                        <div class="top-categories" id="topCategories">
+                            <div class="category-item">
+                                <span class="category-name">No data available</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Financial Insights -->
+                <div class="insights-section">
+                    <h3>Financial Insights</h3>
+                    <div class="insights-grid" id="financialInsights">
+                        <div class="insight-card">
+                            <i class="fas fa-lightbulb"></i>
+                            <p>Add some transactions to see personalized insights!</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Budgets Section -->
+            <section id="budgets" class="content-section">
+                <div class="section-header">
+                    <h2>Budget Management</h2>
+                    <button class="btn-primary" id="addBudgetBtn">
+                        <i class="fas fa-plus"></i> Create Budget
+                    </button>
+                </div>
+
+                <div class="budgets-grid" id="budgetsGrid">
+                    <div class="no-budgets">
+                        <i class="fas fa-bullseye"></i>
+                        <h3>No budgets set</h3>
+                        <p>Create your first budget to track spending limits</p>
+                        <button class="btn-primary" onclick="showAddBudgetModal()">
+                            Create Budget
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Goals Section -->
+            <section id="goals" class="content-section">
+                <div class="section-header">
+                    <h2>Financial Goals</h2>
+                    <button class="btn-primary" id="addGoalBtn">
+                        <i class="fas fa-plus"></i> Add Goal
+                    </button>
+                </div>
+
+                <div class="goals-grid" id="goalsGrid">
+                    <div class="no-goals">
+                        <i class="fas fa-trophy"></i>
+                        <h3>No goals set</h3>
+                        <p>Set financial goals to track your progress</p>
+                        <button class="btn-primary" onclick="showAddGoalModal()">
+                            Add Goal
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Settings Section -->
+            <section id="settings" class="content-section">
+                <div class="section-header">
+                    <h2>Settings</h2>
+                </div>
+
+                <div class="settings-grid">
+                    <div class="settings-card">
+                        <h3>Preferences</h3>
+                        <div class="setting-item">
+                            <label>Currency</label>
+                            <select id="currencySetting">
+                                <option value="RWF">RWF - Rwandan Franc</option>
+                                <option value="USD">USD - US Dollar</option>
+                                <option value="EUR">EUR - Euro</option>
+                            </select>
+                        </div>
+                        <div class="setting-item">
+                            <label>Theme</label>
+                            <div class="theme-options">
+                                <button class="theme-option active" data-theme="light">Light</button>
+                                <button class="theme-option" data-theme="dark">Dark</button>
+                                <button class="theme-option" data-theme="auto">Auto</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-card">
+                        <h3>Data Management</h3>
+                        <div class="setting-actions">
+                            <button class="btn-secondary" id="exportAllData">
+                                <i class="fas fa-download"></i> Export All Data
+                            </button>
+                            <button class="btn-secondary" id="importData">
+                                <i class="fas fa-upload"></i> Import Data
+                            </button>
+                            <button class="btn-danger" id="clearAllData">
+                                <i class="fas fa-trash"></i> Clear All Data
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <!-- Add Transaction Modal -->
+    <div id="addTransactionModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add New Transaction</h3>
+                <button class="modal-close" onclick="closeModal('addTransactionModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="transactionForm" class="modal-form">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="description">Description *</label>
+                        <input type="text" id="description" placeholder="e.g., Lunch, Salary" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="amount">Amount *</label>
+                        <div class="amount-input">
+                            <input type="number" id="amount" placeholder="0" required min="0.01" step="0.01">
+                            <span class="currency">RWF</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Transaction Type *</label>
+                        <div class="type-selector">
+                            <label class="type-option income-option">
+                                <input type="radio" name="type" value="income" required>
+                                <span class="type-label">
+                                    <i class="fas fa-arrow-up"></i>
+                                    Income
+                                </span>
+                            </label>
+                            <label class="type-option expense-option">
+                                <input type="radio" name="type" value="expense" required>
+                                <span class="type-label">
+                                    <i class="fas fa-arrow-down"></i>
+                                    Expense
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="category">Category *</label>
+                        <select id="category" required>
+                            <option value="">Select Category</option>
+                            <optgroup label="Income">
+                                <option value="Salary">💼 Salary</option>
+                                <option value="Freelance">💻 Freelance</option>
+                                <option value="Investment">📈 Investment</option>
+                                <option value="Gift">🎁 Gift</option>
+                                <option value="Other Income">💰 Other Income</option>
+                            </optgroup>
+                            <optgroup label="Expenses">
+                                <option value="Food">🍽️ Food & Dining</option>
+                                <option value="Transport">🚗 Transportation</option>
+                                <option value="Entertainment">🎬 Entertainment</option>
+                                <option value="Shopping">🛍️ Shopping</option>
+                                <option value="Bills">💡 Bills & Utilities</option>
+                                <option value="Healthcare">🏥 Healthcare</option>
+                                <option value="Education">📚 Education</option>
+                                <option value="Other">📦 Other</option>
+                            </optgroup>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="date">Date *</label>
+                        <input type="date" id="date" required>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="notes">Notes (Optional)</label>
+                        <textarea id="notes" placeholder="Add any additional notes..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" onclick="closeModal('addTransactionModal')">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-plus"></i> Add Transaction
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Transaction Modal -->
+    <div id="editTransactionModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Edit Transaction</h3>
+                <button class="modal-close" onclick="closeModal('editTransactionModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="editTransactionForm" class="modal-form">
+                <input type="hidden" id="editTransactionId">
+                <!-- Same form fields as add transaction -->
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="editDescription">Description *</label>
+                        <input type="text" id="editDescription" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editAmount">Amount *</label>
+                        <div class="amount-input">
+                            <input type="number" id="editAmount" required min="0.01" step="0.01">
+                            <span class="currency">RWF</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Transaction Type *</label>
+                        <div class="type-selector">
+                            <label class="type-option income-option">
+                                <input type="radio" name="editType" value="income" required>
+                                <span class="type-label">
+                                    <i class="fas fa-arrow-up"></i>
+                                    Income
+                                </span>
+                            </label>
+                            <label class="type-option expense-option">
+                                <input type="radio" name="editType" value="expense" required>
+                                <span class="type-label">
+                                    <i class="fas fa-arrow-down"></i>
+                                    Expense
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="editCategory">Category *</label>
+                        <select id="editCategory" required>
+                            <option value="">Select Category</option>
+                            <optgroup label="Income">
+                                <option value="Salary">💼 Salary</option>
+                                <option value="Freelance">💻 Freelance</option>
+                                <option value="Investment">📈 Investment</option>
+                                <option value="Gift">🎁 Gift</option>
+                                <option value="Other Income">💰 Other Income</option>
+                            </optgroup>
+                            <optgroup label="Expenses">
+                                <option value="Food">🍽️ Food & Dining</option>
+                                <option value="Transport">🚗 Transportation</option>
+                                <option value="Entertainment">🎬 Entertainment</option>
+                                <option value="Shopping">🛍️ Shopping</option>
+                                <option value="Bills">💡 Bills & Utilities</option>
+                                <option value="Healthcare">🏥 Healthcare</option>
+                                <option value="Education">📚 Education</option>
+                                <option value="Other">📦 Other</option>
+                            </optgroup>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="editDate">Date *</label>
+                        <input type="date" id="editDate" required>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="editNotes">Notes (Optional)</label>
+                        <textarea id="editNotes" placeholder="Add any additional notes..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" onclick="closeModal('editTransactionModal')">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-save"></i> Update Transaction
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Notification Container -->
+    <div id="notificationContainer" class="notification-container"></div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <!-- Notification Container -->
+    <div id="notificationContainer" class="notification-container"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
